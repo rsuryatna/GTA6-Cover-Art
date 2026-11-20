@@ -1,0 +1,88 @@
+/* Vice Cover Studio: a dark, neon-edged editor. The preview canvas is the
+   cover itself; the controls sit beside it. In a ?shot=cover scene the
+   controls are hidden and the cover fills the frame. */
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: #14091f;
+  color: #f5eefc;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+.app {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 24px;
+  min-height: 100vh;
+  padding: 20px;
+}
+.controls h1 {
+  margin: 0 0 4px;
+  font-size: 28px;
+  letter-spacing: 0.5px;
+  color: #ff2e88;
+  text-transform: uppercase;
+}
+.tagline { margin: 0 0 18px; color: #c9b8d8; font-size: 14px; line-height: 1.45; }
+.field { display: block; margin: 14px 0; font-size: 14px; font-weight: 700; }
+.field input[type="text"] {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 12px;
+  border: 2px solid #5b2a86;
+  border-radius: 8px;
+  background: #241233;
+  color: #fff;
+  font-size: 16px;
+}
+.field input[type="file"] { display: block; margin-top: 6px; font-size: 13px; }
+button {
+  display: inline-block;
+  margin: 4px 4px 4px 0;
+  padding: 10px 14px;
+  border: 2px solid #5b2a86;
+  border-radius: 8px;
+  background: #2a1740;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+button:hover { border-color: #ff2e88; }
+button.active { background: #ff2e88; border-color: #ff2e88; }
+button.primary {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  background: #ff2e88;
+  border-color: #ff2e88;
+  font-size: 15px;
+}
+.grades, .exports { display: flex; flex-wrap: wrap; margin-top: 6px; }
+.hint { margin: 6px 0; color: #a98fc4; font-size: 13px; line-height: 1.4; }
+#status { min-height: 20px; color: #7fe7ff; font-size: 13px; }
+.preview { display: flex; align-items: flex-start; justify-content: center; }
+#cover {
+  width: min(100%, calc(100vh - 40px));
+  height: auto;
+  border-radius: 6px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+  cursor: grab;
+  touch-action: none;
+}
+#cover:active { cursor: grabbing; }
+body.shot-cover { background: #14091f; }
+body.shot-cover .app { display: block; padding: 0; }
+body.shot-cover .controls { display: none; }
+body.shot-cover .preview { display: block; }
+body.shot-cover #cover {
+  width: 100vw;
+  height: 100vh;
+  object-fit: contain;
+  border-radius: 0;
+  box-shadow: none;
+}
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; }
+  #cover { width: 100%; }
+}
