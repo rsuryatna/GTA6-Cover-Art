@@ -1,32 +1,51 @@
-// Fixed scenes for screenshots: ?shot=cover shows the cover alone, ?shot=editor
-// shows the app with a photo loaded, ?shot=portrait a 1080x1350 cover, and
-// ?shot=neon the same cover in the neon grade. window.__shotReady is set once
-// the scene is painted, so a screenshot tool knows when to shoot.
-export async function runShot(shot, query, api) {
-  const caption = query.get('caption') ?? 'Sunset Heist';
-  const grade = query.get('grade') ?? 'sunset';
-  const hero = await api.loadImage('samples/hero.jpg');
-  const street = await api.loadImage('samples/street.jpg');
-  api.setCaption(caption);
-  api.setGrade(grade);
-  api.setDefaultScene(street);
-  await api.setHeroPhoto(hero);
+// shots.js — PNG export and thumbnails (fresh code).
+import { renderCover, SIZES } from './cover.js';
 
-  if (shot === 'cover' || shot === 'portrait' || shot === 'neon' || shot === 'wide') {
-    document.body.classList.add('shot-cover');
-    const canvas = document.getElementById('cover');
-    if (shot === 'portrait') {
-      canvas.width = 1080;
-      canvas.height = 1350;
-    }
-    if (shot === 'wide' || shot === 'neon') {
-      canvas.width = 1920;
-      canvas.height = 1080;
-    }
-    api.redraw();
-  }
-  // editor: the page as-is, hero loaded, panels filled.
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    window.__shotReady = true;
-  }));
+// Render the cover at an export size onto a fresh canvas (no selection outline).
+export function renderToCanvas(state, images, sizeId) {
+  const size = SIZES.find((s) => s.id === sizeId) || SIZES[0];
+  const canvas = document.createElement('canvas');
+  canvas.width = size.w;
+  canvas.height = size.h;
+  const ctx = canvas.getContext('2d');
+  renderCover(ctx, size.w, size.h, state, images, { showSelection: false });
+  return canvas;
+}
+
+export function downloadCover(state, images, sizeId) {
+  const size = SIZES.find((s) => s.id === sizeId) || SIZES[0];
+  const canvas = renderToCanvas(state, images, sizeId);
+  const name = `${slug(state.title)}-${size.id}-${size.w}x${size.h}.png`;
+  canvas.toBlob((blob) => {
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  }, 'image/png');
+}
+
+function slug(title) {
+  return String(title || 'vice-tide').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'vice-tide';
+}
+
+// A small JPEG data URL of the clean cover (no editor outline), for screenshots.
+export function coverJpeg(state, images, sizeId, quality) {
+  const canvas = renderToCanvas(state, images, sizeId);
+  return canvas.toDataURL('image/jpeg', quality == null ? 0.82 : quality);
+}
+
+// Small thumbnails for the export step.
+export function thumbUrl(state, images, sizeId, w) {
+  const canvas = renderToCanvas(state, images, sizeId);
+  const t = document.createElement('canvas');
+  const scale = w / canvas.width;
+  t.width = w;
+  t.height = Math.round(canvas.height * scale);
+  t.getContext('2d').drawImage(canvas, 0, 0, t.width, t.height);
+  return t.toDataURL('image/jpeg', 0.8);
 }

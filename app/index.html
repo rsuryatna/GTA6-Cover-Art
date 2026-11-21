@@ -1,54 +1,104 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vice Cover Studio — GTA-style cover art maker</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23ff2e88'/%3E%3Ctext x='16' y='23' font-size='20' font-weight='900' text-anchor='middle' fill='white'%3EV%3C/text%3E%3C/svg%3E">
-<link rel="stylesheet" href="./style.css">
+<title>VICE TIDE Cover Studio — Slanted Grid GTA-style cover maker</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<main class="app">
-  <section class="controls">
-    <h1>Vice Cover Studio</h1>
-    <p class="tagline">Your photo, popped out of a GTA-style multi-panel cover. Everything runs on your machine — photos never leave it.</p>
+<header class="topbar">
+  <div class="brand">🌴 <strong>VICE TIDE</strong> <em>Cover Studio</em></div>
+  <div class="top-actions">
+    <button id="undoBtn" title="Undo">↩ Undo</button>
+    <button id="redoBtn" title="Redo">↪ Redo</button>
+    <span class="privacy">🔒 Photos never leave this device</span>
+  </div>
+</header>
 
-    <label class="field">Hero photo (the pop-out person)
-      <input id="heroPhoto" type="file" accept="image/*">
-    </label>
-    <label class="field">Photo for the selected panel
-      <input id="panelPhoto" type="file" accept="image/*">
-    </label>
-    <button id="fillAll" type="button">Fill all empty panels with that photo</button>
-    <p class="hint" id="panelLabel">Hero panel (the pop-out)</p>
-    <p class="hint">Click a panel to select it, drag it to position its photo, scroll to zoom.</p>
+<nav class="wizard">
+  <button class="step active" data-step="1"><b>1</b> Add photos</button>
+  <button class="step" data-step="2"><b>2</b> Caption</button>
+  <button class="step" data-step="3"><b>3</b> Export PNG</button>
+</nav>
 
-    <label class="field">Caption
-      <input id="caption" type="text" maxlength="40" value="Sunset Heist">
-    </label>
-
-    <div class="field">Colour grade
-      <div class="grades">
-        <button type="button" data-grade="sunset" class="active">Sunset</button>
-        <button type="button" data-grade="neon">Neon</button>
-        <button type="button" data-grade="coral">Coral Heat</button>
+<main class="layout">
+  <aside class="panel">
+    <section class="stepPane active" data-step="1">
+      <h2>1 · Add photos</h2>
+      <button id="demoBtn" class="wide">★ Try demo cast <small>10-photo cast</small></button>
+      <button id="chooseBtn" class="wide ghost">Choose photos <small>or drop / paste them anywhere</small></button>
+      <input type="file" id="fileInput" accept="image/*" multiple hidden>
+      <p id="photoCount" class="muted">10 photos loaded</p>
+      <div id="photoWells" class="wells"></div>
+      <div class="row">
+        <button id="surpriseBtn">🎲 Surprise me</button>
+        <button id="autofillBtn">✦ Auto-fill panels</button>
       </div>
-    </div>
-
-    <div class="field">Export PNG
-      <div class="exports">
-        <button type="button" data-export="0">1080 × 1080</button>
-        <button type="button" data-export="1">1080 × 1350</button>
-        <button type="button" data-export="2">1920 × 1080</button>
+      <h3>Layout</h3>
+      <div id="layoutRow" class="chips"></div>
+      <h3>Colour grade</h3>
+      <div id="gradeRow" class="chips"></div>
+      <label class="slider">Grade strength <input type="range" id="gradeStrength" min="0" max="100" value="80"></label>
+      <label class="slider">Film grain <input type="range" id="grainRange" min="0" max="100" value="18"></label>
+      <label class="slider">Glow <input type="range" id="glowRange" min="0" max="100" value="22"></label>
+      <label class="check"><input type="checkbox" id="halftoneCheck"> Halftone print</label>
+      <h3>Poster furniture <span class="muted">(optional, off by default)</span></h3>
+      <div class="furn">
+        <label class="check"><input type="checkbox" data-furn="roleTags"> Role tags</label>
+        <label class="check"><input type="checkbox" data-furn="reviewStrip"> Review strip</label>
+        <label class="check"><input type="checkbox" data-furn="billing"> Billing block</label>
+        <label class="check"><input type="checkbox" data-furn="goldSeal"> Gold seal</label>
+        <label class="check"><input type="checkbox" data-furn="barcode"> Barcode</label>
+        <label class="check"><input type="checkbox" data-furn="comingSoon"> Coming soon</label>
+        <label class="check"><input type="checkbox" data-furn="editionTag"> Edition tag</label>
       </div>
-      <button id="exportAll" type="button" class="primary">Export all three sizes</button>
+    </section>
+
+    <section class="stepPane" data-step="2">
+      <h2>2 · Caption</h2>
+      <label class="field">Cover title
+        <input type="text" id="titleInput" value="VICE TIDE" maxlength="24">
+      </label>
+      <p class="muted">The title renders as one huge stacked logo in the centre of the
+      slanted grid — no other text appears on the cover.</p>
+      <h3>Layout</h3>
+      <div class="chips" id="layoutRow2"></div>
+      <h3>Colour grade</h3>
+      <div class="chips" id="gradeRow2"></div>
+    </section>
+
+    <section class="stepPane" data-step="3">
+      <h2>3 · Export PNG</h2>
+      <p class="muted">Three sizes, ready for the bounty screenshots.</p>
+      <div id="thumbRow" class="thumbs"></div>
+      <button class="wide" data-export="wide">Download 16:9 · 1920×1080</button>
+      <button class="wide" data-export="portrait">Download 4:5 · 1080×1350</button>
+      <button class="wide" data-export="square">Download 1:1 · 1080×1080</button>
+    </section>
+  </aside>
+
+  <section class="stage">
+    <div class="stage-head">
+      <span>Live preview</span>
+      <span class="sizes" id="sizeRow"></span>
     </div>
-    <p id="status" role="status"></p>
-  </section>
-  <section class="preview">
-    <canvas id="cover" width="1080" height="1080" aria-label="The cover"></canvas>
+    <div class="canvasWrap">
+      <canvas id="coverCanvas" width="1920" height="1080"></canvas>
+    </div>
+    <div id="panelBar" class="panelBar">
+      <span id="panelLabel">Panel 1</span>
+      <select id="panelPhoto"></select>
+      <button id="flipBtn">Flip</button>
+      <label>Zoom <input type="range" id="zoomRange" min="60" max="250" value="100"></label>
+      <button id="swapBtn">Swap ⇄</button>
+      <button id="resetPanelBtn">Reset</button>
+    </div>
+    <p class="hint">Click a panel to select it · drag to pan · wheel to zoom · Shift-drag to swap panels</p>
   </section>
 </main>
-<script type="module" src="./src/main.js"></script>
+
+<script type="module" src="src/main.js"></script>
 </body>
 </html>
